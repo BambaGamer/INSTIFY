@@ -160,7 +160,7 @@ h1 { font-size: 3rem; margin: 0; font-weight: 900; letter-spacing: -1px; }
 }
 
 #playBtn {
-    background: white;
+    background: rgb(240, 197, 233);
     color: black;
     border: none;
     border-radius: 50%;
@@ -172,6 +172,7 @@ h1 { font-size: 3rem; margin: 0; font-weight: 900; letter-spacing: -1px; }
     align-items: center;
     justify-content: center;
     transition: transform 0.2s;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
 }
 
 #playBtn:active {
