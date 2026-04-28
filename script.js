@@ -123,9 +123,8 @@ function render() {
             <img src="${song.image}" class="thumb">
             <div class="info">
                 <p>${song.title}</p>
-                <small>לחץ לניגון</small>
             </div>
-            <button class="btn-delete" onclick="deleteSong(event, ${song.id})">🗑️</button>
+            <button class="btn-delete" onclick="deleteSong(event, ${song.id})">ㄨ</button>
         `;
         card.onclick = () => play(song);
         list.appendChild(card);
