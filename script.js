@@ -197,6 +197,6 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // מאזינים לאירועים של האודיו עצמו כדי לעדכן את הכפתור תמיד
-audio.onplay = updateBtn;
-audio.onpause = updateBtn;
-audio.onended = updateBtn;
+audio.onplay = updateBtn();
+audio.onpause = updateBtn();
+audio.onended = updateBtn();
