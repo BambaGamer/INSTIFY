@@ -20,17 +20,117 @@ body.light-mode {
 body { 
     background: var(--bg); 
     color: var(--text); 
-    transition: background 0.3s, color 0.3s; /* מעבר חלק */
+    transition: background 0.3s, color 0.3s;
     font-family: -apple-system, system-ui, sans-serif; 
     margin: 0; 
     padding: 20px; 
+    direction: rtl; /* תמיכה בעברית */
 }
 
+/* --- אזור העלאה (כפתור הטיל) --- */
 .input-area {
     margin-bottom: 25px;
+    display: flex;
+    flex-direction: row-reverse;
+    gap: 10px;
 }
 
-/* הבר התחתון - סידור סופי */
+#fileInput {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    border: 0;
+    display: block;
+}
+
+.btn-upload-full {
+    width: 100%;
+    height: 60px;
+    background: var(--primary);
+    border: none;
+    border-radius: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.btn-upload-full span {
+    color: white;
+    font-size: 1.1rem;
+    font-weight: bold;
+}
+
+.rocket-icon {
+    width: 35px;
+    height: 35px;
+    object-fit: contain;
+}
+
+.btn-upload-full:hover {
+    transform: translateY(-3px);
+    filter: brightness(1.1);
+}
+
+/* --- כפתור מצב יום/לילה --- */
+.theme-btn {
+    background: var(--secondary);
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    width: 45px;
+    height: 45px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    transition: all 0.3s;
+}
+
+/* --- רשימת השירים --- */
+header { margin-top: 30px; margin-bottom: 30px; text-align: right; }
+h1 { font-size: 3rem; margin: 0; font-weight: 900; letter-spacing: -1px; }
+.count { color: var(--primary); font-weight: bold; font-size: 0.9rem; }
+
+.list { display: flex; flex-direction: column; gap: 12px; padding-bottom: 120px; }
+
+.song-card { 
+    background: var(--card); 
+    padding: 12px; 
+    border-radius: 16px; 
+    display: flex; 
+    flex-direction: row-reverse; 
+    align-items: center; 
+    gap: 15px; 
+    transition: 0.3s; 
+    cursor: pointer;
+}
+
+.song-card:hover { transform: scale(1.02); }
+
+.thumb { width: 55px; height: 55px; border-radius: 10px; object-fit: cover; background: #333; }
+.info { flex: 1; text-align: right; }
+.info p { margin: 0; font-weight: bold; }
+
+.btn-delete { 
+    background: none; 
+    border: none; 
+    color: #444; 
+    font-size: 1.5rem; 
+    cursor: pointer; 
+    padding: 5px;
+}
+
+.btn-delete:hover { color: #ff4444; }
+
+/* --- הנגן התחתון (התיקון של המרכוז) --- */
 .player-bar {
     position: fixed;
     bottom: 0;
@@ -40,7 +140,7 @@ body {
     background-color: #181818; 
     border-top: 1px solid #282828;
     display: flex;
-    flex-direction: row-reverse; /* מתאים לעברית - תמונה בימין, כפתור באמצע */
+    flex-direction: row-reverse; /* תמונה בימין, כפתור באמצע */
     align-items: center;
     justify-content: space-between;
     padding: 0 20px;
@@ -48,13 +148,12 @@ body {
     z-index: 1000;
 }
 
-/* חלק התמונה והשם - צד ימין */
 .player-info {
     display: flex;
-    flex-direction: row-reverse; /* תמונה מימין לטקסט */
+    flex-direction: row-reverse;
     align-items: center;
     gap: 12px;
-    flex: 1; /* תופס שליש מהרוחב */
+    flex: 1;
     min-width: 0;
 }
 
@@ -77,12 +176,11 @@ body {
     text-overflow: ellipsis;
 }
 
-/* חלק הכפתור - מרכז */
 .player-controls {
     display: flex;
     align-items: center;
     justify-content: center;
-    flex: 1; /* תופס את השליש האמצעי */
+    flex: 1;
 }
 
 #playBtn {
@@ -101,125 +199,22 @@ body {
     box-shadow: 0 4px 10px rgba(0,0,0,0.3);
 }
 
-/* חלק ריק - צד שמאל (לאיזון) */
 .player-spacer {
-    flex: 1; /* תופס את השליש השמאלי */
+    flex: 1;
 }
 
-/* התאמה לנייד - שהשם לא ימחץ את הכפתור */
+/* --- לואדר --- */
+.loader { 
+    display: none; 
+    text-align: center; 
+    color: var(--primary); 
+    margin-bottom: 20px; 
+    font-weight: bold; 
+}
+
+/* התאמה לנייד */
 @media (max-width: 480px) {
     #playerTitle { max-width: 100px; font-size: 12px; }
     .player-bar { padding: 0 10px; }
+    h1 { font-size: 2.2rem; }
 }
-
-#playBtn:hover {
-    transform: scale(1.05);
-}
-
-#fileInput {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    padding: 0;
-    margin: -1px;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    border: 0;
-    display: block; /* משאירים אותו בחיים אבל בלתי נראה */
-}
-
-.btn-upload-full {
-    width: 100%;
-    height: 60px;
-    background: var(--primary); /* הירוק של ספוטיפיי */
-    border: none;
-    border-radius: 15px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 15px; /* רווח בין הטיל לטקסט */
-    cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-}
-
-.btn-upload-full span {
-    color: black;
-    font-size: 1.1rem;
-    font-weight: bold;
-}
-
-.rocket-icon {
-    width: 35px;
-    height: 35px;
-    object-fit: contain;
-}
-
-.btn-upload-full:hover {
-    transform: translateY(-3px);
-    filter: brightness(1.1);
-    box-shadow: 0 6px 20px rgba(30, 215, 96, 0.4);
-}
-
-.btn-upload-full:active {
-    transform: translateY(1px);
-}
-
-.theme-btn {
-    background: var(--secondary);
-    border: 1px solid var(--border);
-    border-radius: 50%;
-    width: 45px;
-    height: 45px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 8px;
-    overflow: hidden;
-    transition: background 0.3s, border-color 0.3s;
-}
-
-.theme-icon {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    transition: transform 0.4s ease, opacity 0.3s ease;
-}
-
-.sun-icon {
-    display: none;
-}
-.moon-icon {
-    display: block;
-}
-
-body.light-mode .sun-icon {
-    display: block;
-}
-body.light-mode .moon-icon {
-    display: none;
-}
-
-.theme-btn:active .theme-icon {
-    transform: scale(0.9) rotate(15deg);
-}
-
-header { margin-top: 30px; margin-bottom: 30px; text-align: right; }
-h1 { font-size: 3rem; margin: 0; font-weight: 900; letter-spacing: -1px; }
-.count { color: var(--primary); font-weight: bold; font-size: 0.9rem; }
-
-.input-area { display: flex; flex-direction: row-reverse; gap: 10px; margin-bottom: 30px; }
-.input-box { flex: 1; background: #1a1a1a; border: 1px solid #333; border-radius: 12px; padding: 15px; color: white; font-size: 1rem; text-align: right; outline: none; }
-.btn-go { background: var(--primary); border: none; border-radius: 12px; width: 60px; height: 55px; cursor: pointer; font-size: 1.5rem; transition: 0.2s; }
-.btn-go:active { transform: scale(0.9); }
-
-.list { display: flex; flex-direction: column; gap: 12px; padding-bottom: 100px; }
-.song-card { background: var(--card); padding: 12px; border-radius: 16px; display: flex; flex-direction: row-reverse; align-items: center; gap: 15px; transition: 0.3s; }
-.song-card:active { background: #222; }
-.thumb { width: 55px; height: 55px; border-radius: 10px; object-fit: cover; background: #333; }
-.info { flex: 1; text-align: right; }
-.info p { margin: 0; font-weight: bold; }
-.btn-delete { background: none; border: none; color: #444; font-size: 1.2rem; cursor: pointer; }
-
-.loader { display: none; text-align: center; color: var(--primary); margin-bottom: 20px; font-weight: bold; }
