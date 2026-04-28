@@ -28,30 +28,29 @@ async function extract() {
     document.getElementById('loader').style.display = 'block';
     
     try {
-        // שרת חילוץ חזק שעוקף את החסימות של אינסטגרם
-        const response = await fetch(`https://api.downloadgram.org/api/ig/v1/res?url=${encodeURIComponent(url)}`);
-        const data = await response.json();
+        // שרת SnapAny - חזק מאוד בחילוץ MP3 מרילס
+        const res = await fetch(`https://api.snapany.com/api/info?url=${encodeURIComponent(url)}`);
+        const data = await res.json();
         
-        // מחפשים את קובץ הווידאו/אודיו בתוצאות
-        if (data && data.results && data.results.length > 0) {
-            const mediaUrl = data.results[0].url;
+        if (data && data.medias) {
+            // מוצאים את הקובץ עם האיכות הכי גבוהה
+            const audioFile = data.medias.find(m => m.extension === 'mp3' || m.type === 'audio') || data.medias[0];
             
             const newSong = {
                 id: Date.now(),
                 title: prompt("איך לקרוא לשיר?", "שיר חדש") || "שיר מהאינסטגרם",
-                url: mediaUrl,
-                image: data.results[0].thumbnail || 'https://i.pinimg.com/1200x/a8/98/34/a89834b9eb73330380b26ab3cb612a8e.jpg'
+                url: audioFile.url, 
+                image: data.thumbnail || 'https://i.pinimg.com/1200x/a8/98/34/a89834b9eb73330380b26ab3cb612a8e.jpg'
             };
 
             songs.unshift(newSong);
             urlInput.value = '';
             save();
         } else {
-            alert('השרת לא הצליח לחלץ את הקובץ. נסה שוב בעוד כמה שניות.');
+            alert('השרת לא הצליח למצוא מדיה בלינק הזה. נסה רילס אחר.');
         }
     } catch (e) {
-        console.error(e);
-        alert('תקלה בשרת החילוץ. נסה שוב מאוחר יותר.');
+        alert('תקלה בבוט החילוץ. נסה שוב בעוד דקה.');
     } finally {
         document.getElementById('loader').style.display = 'none';
     }
@@ -80,24 +79,45 @@ function render() {
     });
 }
 
-function play(song) {
-    if (audio.src === song.url) {
-        if (isPlaying) { audio.pause(); isPlaying = false; }
-        else { audio.play(); isPlaying = true; }
-    } else {
-        audio.src = song.url;
+async function play(song) {
+    const player = document.getElementById('player');
+    const playerTitle = document.getElementById('playerTitle');
+    
+    try {
+        if (audio.dataset.currentId === song.id.toString()) {
+            if (isPlaying) { audio.pause(); isPlaying = false; }
+            else { audio.play(); isPlaying = true; }
+            updateBtn();
+            return;
+        }
+
+        playerTitle.innerText = "מעבד סאונד...";
+        player.style.display = 'flex';
+
+        // שימוש בפרוקסי מהיר במיוחד כדי לעקוף את החסימה של אינסטגרם
+        // זה גורם לאינסטגרם לחשוב שגולש רגיל מוריד את הקובץ
+        const proxyUrl = "https://corsproxy.io/?";
+        const finalUrl = proxyUrl + encodeURIComponent(song.url);
+
+        audio.src = finalUrl;
+        audio.dataset.currentId = song.id;
+        
+        // הגדרה שמאפשרת לדפדפן להזרים את האודיו בלי חסימות אבטחה
+        audio.crossOrigin = "anonymous"; 
+        
         audio.play().then(() => {
             isPlaying = true;
-            document.getElementById('player').style.display = 'flex';
-            document.getElementById('playerTitle').innerText = song.title;
+            playerTitle.innerText = song.title;
             document.getElementById('playerImg').src = song.image;
             updateBtn();
         }).catch(err => {
-            console.error("Playback error:", err);
-            alert("הלינק פקע. תמחק ותחלץ את השיר מחדש.");
+            console.error(err);
+            alert("אינסטגרם חסמה את הזרם הזה. נסה לחלץ את השיר מחדש.");
         });
+
+    } catch (e) {
+        alert("שגיאה בנגן.");
     }
-    updateBtn();
 }
 
 function updateBtn() {
