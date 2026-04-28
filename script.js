@@ -71,6 +71,27 @@ document.getElementById('fileInput').addEventListener('change', function(event) 
     };
 });
 
+const themeToggle = document.getElementById('themeToggle');
+const themeEmoji = document.getElementById('themeEmoji');
+
+// בדיקה אם המשתמש היה במצב אור פעם קודמת
+if (localStorage.getItem('theme') === 'light') {
+    document.body.classList.add('light-mode');
+    themeEmoji.innerText = '☀️';
+}
+
+themeToggle.addEventListener('click', () => {
+    document.body.classList.toggle('light-mode');
+    
+    if (document.body.classList.contains('light-mode')) {
+        themeEmoji.innerText = '☀️';
+        localStorage.setItem('theme', 'light');
+    } else {
+        themeEmoji.innerText = '🌙';
+        localStorage.setItem('theme', 'dark');
+    }
+});
+
 // --- 4. פונקציית הניגון ---
 function play(song) {
     const player = document.getElementById('player');
