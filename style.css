@@ -139,7 +139,7 @@ h1 { font-size: 3rem; margin: 0; font-weight: 900; letter-spacing: -1px; }
     left: 15px;
     right: 15px;
     height: 75px;
-    background: rgba(28, 28, 28, 0.95); /* שקיפות עדינה */
+    background: rgba(140, 58, 156, 0.95); /* שקיפות עדינה */
     backdrop-filter: blur(10px); /* אפקט זכוכית */
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 20px; /* פינות עגולות ואסתטיות */
