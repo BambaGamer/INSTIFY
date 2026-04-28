@@ -30,6 +30,18 @@ body {
     margin-bottom: 25px;
 }
 
+#fileInput {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    border: 0;
+    display: block; /* משאירים אותו בחיים אבל בלתי נראה */
+}
+
 .btn-upload-full {
     width: 100%;
     height: 60px;
