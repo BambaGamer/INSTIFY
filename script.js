@@ -23,49 +23,27 @@ themeToggle.onclick = () => {
 async function extract() {
     const urlInput = document.getElementById('urlInput');
     let url = urlInput.value.trim();
-    
     if (!url.includes('instagram.com')) return alert('אחי, שים לינק תקין');
 
     document.getElementById('loader').style.display = 'block';
 
-    // הטריק: אנחנו הופכים את הלינק ללינק של "מראה" שפתוח להורדה
-    // הופך את www.instagram.com ל-ddinstagram.com
-    let dlUrl = url.replace('instagram.com', 'ddinstagram.com');
+    // יצירת לינק ישיר דרך שרת המראה עם סיומת מדיה
+    let cleanUrl = url.split('?')[0]; // מוריד זבל מהלינק
+    let dlUrl = cleanUrl.replace('instagram.com', 'ddinstagram.com') + ".mp4";
+
+    const songTitle = prompt("איך לקרוא לשיר?", "שיר חדש") || "שיר מהאינסטגרם";
     
-    // מוודא שאנחנו פונים לגרסת ה-MP4/MP3
-    if (!dlUrl.includes('ddinstagram.com')) {
-        alert('בעיה בעיבוד הלינק, נסה שוב');
-        document.getElementById('loader').style.display = 'none';
-        return;
-    }
+    const newSong = {
+        id: Date.now(),
+        title: songTitle,
+        url: dlUrl,
+        image: 'https://i.pinimg.com/1200x/a8/98/34/a89834b9eb73330380b26ab3cb612a8e.jpg'
+    };
 
-    try {
-        // אנחנו לא צריכים FETCH כאן כי השרת של ddinstagram
-        // מייצר לנו לינק ישיר לקובץ.
-        const songTitle = prompt("איך לקרוא לשיר?", "שיר חדש") || "שיר מהאינסטגרם";
-        
-        const newSong = {
-            id: Date.now(),
-            title: songTitle,
-            url: dlUrl, // הלינק הזה הופך ישירות לקובץ מדיה שניתן לנגן
-            image: 'https://i.pinimg.com/1200x/a8/98/34/a89834b9eb73330380b26ab3cb612a8e.jpg'
-        };
-
-        songs.unshift(newSong);
-        urlInput.value = '';
-        save();
-        
-        // בדיקה קטנה אם הלינק עובד
-        audio.src = dlUrl;
-        audio.onerror = () => {
-            console.log("Waiting for mirror to sync...");
-        };
-
-    } catch (e) {
-        alert('שגיאה בחילוץ. נסה שוב בעוד כמה רגעים.');
-    } finally {
-        document.getElementById('loader').style.display = 'none';
-    }
+    songs.unshift(newSong);
+    urlInput.value = '';
+    save();
+    document.getElementById('loader').style.display = 'none';
 }
 
 function render() {
@@ -77,10 +55,12 @@ function render() {
     songs.forEach((song, index) => {
         const card = document.createElement('div');
         card.className = 'song-card';
+        // הוספתי אימוג'י של פליי כדי שיהיה לך איפה ללחוץ
         card.innerHTML = `
             <img src="${song.image}" class="thumb">
             <div class="info">
                 <p>${song.title}</p>
+                <small style="color: var(--primary)">לחץ להשמעה ▶️</small>
             </div>
             <button class="btn-delete" onclick="deleteSong(event, ${index})">🗑️</button>
         `;
