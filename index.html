@@ -100,6 +100,22 @@ body {
             render();
         }
 
+        const themeToggle = document.getElementById('themeToggle');
+const body = document.body;
+
+// טעינת הגדרת נושא שנשמרה
+if (localStorage.getItem('theme') === 'light') {
+    body.classList.add('light-mode');
+    themeToggle.innerText = '☀️';
+}
+
+themeToggle.onclick = () => {
+    body.classList.toggle('light-mode');
+    const isLight = body.classList.contains('light-mode');
+    themeToggle.innerText = isLight ? '☀️' : '🌙';
+    localStorage.setItem('theme', isLight ? 'light' : 'dark');
+};
+
         async function extract() {
             const url = document.getElementById('urlInput').value;
             if (!url.includes('instagram.com')) return alert('אחי, שים לינק תקין של אינסטגרם');
