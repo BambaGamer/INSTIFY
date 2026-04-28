@@ -23,28 +23,37 @@ themeToggle.onclick = () => {
 async function extract() {
     const urlInput = document.getElementById('urlInput');
     const url = urlInput.value;
-    if (!url.includes('instagram.com')) return alert('אחי, שים לינק תקין של אינסטגרם');
+    if (!url.includes('instagram.com')) return alert('אחי, שים לינק תקין');
 
     document.getElementById('loader').style.display = 'block';
     
     try {
-        const res = await fetch(`https://social-download-api.vercel.app/api/instagram?url=${encodeURIComponent(url)}`);
+        // זה שרת שמתמחה בלהוציא MP3 מאינסטגרם בצורה יציבה
+        const res = await fetch(`https://api.vkrhost.com/api/download/instagram?url=${encodeURIComponent(url)}`);
         const data = await res.json();
         
-        if (data.links) {
-            const mp3 = data.links.find(l => l.type === 'mp3' || l.type === 'audio')?.url || data.links[0].url;
-            const newSong = {
-                id: Date.now(),
-                title: `Song ${songs.length + 1}`,
-                url: mp3,
-                image: data.thumbnail || 'https://via.placeholder.com/150'
-            };
-            songs.unshift(newSong);
-            urlInput.value = '';
-            save();
+        if (data.status && data.data) {
+            // מחפשים את הלינק של האודיו בתוך התוצאות
+            const audioUrl = data.data.find(item => item.type === 'audio')?.url;
+            const thumbnail = data.data.find(item => item.type === 'image')?.url;
+
+            if (audioUrl) {
+                const newSong = {
+                    id: Date.now(),
+                    title: prompt("איך לקרוא לשיר?", "שיר חדש") || "שיר ללא שם",
+                    url: audioUrl,
+                    image: thumbnail || 'https://via.placeholder.com/150'
+                };
+                songs.unshift(newSong);
+                urlInput.value = '';
+                save();
+            }
+        } else {
+            alert('לא הצלחתי למצוא אודיו בלינק הזה.');
         }
     } catch (e) {
-        alert('שגיאה בחילוץ. נסה שוב מאוחר יותר.');
+        console.error(e);
+        alert('יש תקלה בשרת החילוץ, נסה שוב עוד דקה.');
     } finally {
         document.getElementById('loader').style.display = 'none';
     }
