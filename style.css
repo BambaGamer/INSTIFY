@@ -131,16 +131,17 @@ h1 { font-size: 3rem; margin: 0; font-weight: 900; letter-spacing: -1px; }
 .btn-delete:hover { color: #ff4444; }
 
 /* --- הנגן התחתון (התיקון של המרכוז) --- */
+/* --- הנגן התחתון המעוצב --- */
 .player-bar {
     position: fixed;
     bottom: 0;
     left: 0;
     width: 100%;
     height: 90px;
-    background-color: #181818; 
+    background-color: #181818; /* הבר הכהה */
     border-top: 1px solid #282828;
     display: flex;
-    flex-direction: row-reverse; /* תמונה בימין, כפתור באמצע */
+    flex-direction: row-reverse; /* התמונה תהיה בימין, כמו שצריך בעברית */
     align-items: center;
     justify-content: space-between;
     padding: 0 20px;
@@ -148,12 +149,13 @@ h1 { font-size: 3rem; margin: 0; font-weight: 900; letter-spacing: -1px; }
     z-index: 1000;
 }
 
+/* סידור הפנים של הנגן - צד ימין (תמונה ושם) */
 .player-info {
     display: flex;
-    flex-direction: row-reverse;
+    flex-direction: row-reverse; /* תמונה מימין לטקסט */
     align-items: center;
     gap: 12px;
-    flex: 1;
+    flex: 1; /* תופס את השליש הימני */
     min-width: 0;
 }
 
@@ -176,16 +178,18 @@ h1 { font-size: 3rem; margin: 0; font-weight: 900; letter-spacing: -1px; }
     text-overflow: ellipsis;
 }
 
+/* סידור הפנים של הנגן - מרכז (הכפתור) */
 .player-controls {
     display: flex;
     align-items: center;
     justify-content: center;
-    flex: 1;
+    flex: 1; /* תופס את השליש האמצעי */
 }
 
+/* העיצוב של כפתור הפליי עצמו */
 #playBtn {
-    background: white;
-    color: black;
+    background: white; /* רקע לבן */
+    color: black; /* אימוג'י שחור */
     border: none;
     border-radius: 50%;
     width: 50px;
@@ -195,12 +199,17 @@ h1 { font-size: 3rem; margin: 0; font-weight: 900; letter-spacing: -1px; }
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: transform 0.2s;
+    transition: transform 0.2s, background 0.2s;
     box-shadow: 0 4px 10px rgba(0,0,0,0.3);
 }
 
+#playBtn:hover {
+    transform: scale(1.05);
+}
+
+/* סידור הפנים של הנגן - צד שמאל (ריק) */
 .player-spacer {
-    flex: 1;
+    flex: 1; /* תופס את השליש השמאלי - יוצר איזון */
 }
 
 /* --- לואדר --- */
