@@ -1,4 +1,4 @@
-// --- 1. הגדרת מסד הנתונים (IndexedDB) לשמירת קבצים גדולים ---
+// --- 1. הגדרת מסד הנתונים (IndexedDB) ---
 const dbName = "InstifyDB";
 let db;
 let songs = [];
@@ -16,14 +16,12 @@ request.onupgradeneeded = (e) => {
 
 request.onsuccess = (e) => {
     db = e.target.result;
-    loadSongsFromDB(); // טעינת השירים ברגע שהמסד מוכן
+    loadSongsFromDB();
 };
 
-request.onerror = (e) => {
-    console.error("Database error:", e.target.error);
-};
+request.onerror = (e) => console.error("Database error:", e.target.error);
 
-// --- 2. טעינת השירים מהזיכרון לתצוגה ---
+// --- 2. טעינת השירים ---
 function loadSongsFromDB() {
     const tx = db.transaction("songs", "readonly");
     const store = tx.objectStore("songs");
@@ -35,12 +33,11 @@ function loadSongsFromDB() {
     };
 }
 
-// --- 3. טיפול בהעלאת קובץ (מותאם לאייפון ולמחשב) ---
+// --- 3. העלאת קובץ ---
 document.getElementById('fileInput').addEventListener('change', function(event) {
     const file = event.target.files[0];
     if (!file) return;
 
-    // מציג לואדר (אם יש לך ב-HTML)
     const loader = document.getElementById('loader');
     if (loader) loader.style.display = 'block';
 
@@ -49,11 +46,10 @@ document.getElementById('fileInput').addEventListener('change', function(event) 
     const newSong = {
         id: Date.now(),
         title: songTitle,
-        fileData: file, // שמירת הקובץ הגולמי (Blob) - הכי חסכוני בזיכרון
+        fileData: file,
         image: 'https://i.pinimg.com/1200x/a8/98/34/a89834b9eb73330380b26ab3cb612a8e.jpg'
     };
 
-    // שמירה למסד הנתונים
     const tx = db.transaction("songs", "readwrite");
     const store = tx.objectStore("songs");
     const addRequest = store.add(newSong);
@@ -62,69 +58,54 @@ document.getElementById('fileInput').addEventListener('change', function(event) 
         songs.unshift(newSong);
         render();
         if (loader) loader.style.display = 'none';
-        event.target.value = ''; // מאפס את האינפוט
-    };
-
-    addRequest.onerror = () => {
-        alert("שגיאה בשמירת השיר. יכול להיות שאין מספיק מקום בזיכרון.");
-        if (loader) loader.style.display = 'none';
+        event.target.value = '';
     };
 });
 
+// --- 4. מצב אור/חושך ---
 const themeToggle = document.getElementById('themeToggle');
 const themeEmoji = document.getElementById('themeEmoji');
 
-// בדיקה אם המשתמש היה במצב אור פעם קודמת
 if (localStorage.getItem('theme') === 'light') {
     document.body.classList.add('light-mode');
-    themeEmoji.innerText = '☀️';
+    if (themeEmoji) themeEmoji.innerText = '☀️';
 }
 
-themeToggle.addEventListener('click', () => {
-    document.body.classList.toggle('light-mode');
-    
-    if (document.body.classList.contains('light-mode')) {
-        themeEmoji.innerText = '☀️';
-        localStorage.setItem('theme', 'light');
-    } else {
-        themeEmoji.innerText = '🌙';
-        localStorage.setItem('theme', 'dark');
-    }
-});
+if (themeToggle) {
+    themeToggle.addEventListener('click', () => {
+        document.body.classList.toggle('light-mode');
+        const isLight = document.body.classList.contains('light-mode');
+        if (themeEmoji) themeEmoji.innerText = isLight ? '☀️' : '🌙';
+        localStorage.setItem('theme', isLight ? 'light' : 'dark');
+    });
+}
 
-// --- 4. פונקציית הניגון ---
+// --- 5. פונקציית הניגון (כולל תיקון ה-Pause) ---
 function play(song) {
     const player = document.getElementById('player');
     const playerTitle = document.getElementById('playerTitle');
 
-    // בדיקה: האם השיר הזה הוא השיר שנטען כבר בנגן?
     if (audio.dataset.currentId === song.id.toString()) {
         if (!audio.paused) {
             audio.pause();
-            isPlaying = false;
         } else {
             audio.play();
-            isPlaying = true;
         }
     } else {
-        // שיר חדש לגמרי
-        if (audio.src) URL.revokeObjectURL(audio.src); // ניקוי זיכרון
+        if (audio.src) URL.revokeObjectURL(audio.src);
 
         const songUrl = URL.createObjectURL(song.fileData);
         audio.src = songUrl;
         audio.dataset.currentId = song.id;
         
         audio.play().then(() => {
-            isPlaying = true;
             if (player) player.style.display = 'flex';
             if (playerTitle) playerTitle.innerText = song.title;
         }).catch(err => console.error("Error playing:", err));
     }
-    
-    updateBtn(); // מעדכן את האייקון של ה-Play/Pause
 }
 
-// --- 5. עדכון התצוגה (Rendering) ---
+// --- 6. עדכון התצוגה ---
 function render() {
     const list = document.getElementById('playlist');
     const count = document.getElementById('count');
@@ -148,7 +129,7 @@ function render() {
     });
 }
 
-// --- 6. מחיקת שיר ---
+// --- 7. מחיקת שיר ---
 function deleteSong(e, id) {
     e.stopPropagation();
     if (!confirm("למחוק את השיר?")) return;
@@ -160,43 +141,38 @@ function deleteSong(e, id) {
     songs = songs.filter(s => s.id !== id);
     if (audio.dataset.currentId === id.toString()) {
         audio.pause();
-        isPlaying = false;
         document.getElementById('player').style.display = 'none';
     }
     render();
 }
 
-// --- 7. עדכון כפתור Play/Pause ---
-// פונקציה לעדכון האייקון של הכפתור
+// --- 8. עדכון כפתור Play/Pause (התיקון הקריטי) ---
 function updateBtn() {
     const mainPlayBtn = document.getElementById('playBtn');
     if (mainPlayBtn) {
-        // אם האודיו מנגן - שים אייקון של פוס, אם לא - שים פליי
+        // בודקים ישירות את מצב ה-Audio
         mainPlayBtn.innerText = audio.paused ? '▶️' : '⏸';
     }
 }
 
-// חיבור הכפתור למטה לפעולת Play/Pause
-// אנחנו שמים את זה מחוץ לפונקציות כדי שזה ירוץ ברגע שהדף נטען
+// חיבור הכפתור למטה
 document.addEventListener('DOMContentLoaded', () => {
     const mainPlayBtn = document.getElementById('playBtn');
     if (mainPlayBtn) {
         mainPlayBtn.onclick = (e) => {
-            e.stopPropagation(); // מונע בעיות לחיצה באייפון
-            
-            if (!audio.src) return; // אם לא נבחר שיר עדיין
+            e.stopPropagation();
+            if (!audio.src) return;
 
             if (audio.paused) {
                 audio.play();
             } else {
                 audio.pause();
             }
-            updateBtn(); // מעדכן את האייקון מיד
         };
     }
 });
 
-// מאזינים לאירועים של האודיו עצמו כדי לעדכן את הכפתור תמיד
-audio.onplay = updateBtn();
-audio.onpause = updateBtn();
-audio.onended = updateBtn();
+// מאזינים לאירועים של האודיו - בלי סוגריים ()!
+audio.onplay = updateBtn;
+audio.onpause = updateBtn;
+audio.onended = updateBtn;
