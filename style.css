@@ -30,6 +30,83 @@ body {
     margin-bottom: 25px;
 }
 
+/* הבר התחתון עצמו */
+.player-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 80px;
+    background-color: #181818; /* צבע כהה של נגן */
+    border-top: 1px solid #282828;
+    display: flex; /* זה מה שמסדר את הכל בשורה אחת */
+    align-items: center; /* מרכז את הכל אנכית */
+    justify-content: space-between; /* יוצר רווחים שווים בין החלקים */
+    padding: 0 20px;
+    box-sizing: border-box;
+    z-index: 1000;
+}
+
+/* החלק של התמונה והשם (צד שמאל/ימין בהתאם לשפה) */
+.player-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1; /* לוקח חלק מהמרחב */
+}
+
+.player-thumb {
+    width: 50px;
+    height: 50px;
+    border-radius: 4px;
+    object-fit: cover;
+}
+
+#playerTitle {
+    font-size: 14px;
+    font-weight: bold;
+    margin: 0;
+    color: white;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis; /* מוסיף ... אם השם ארוך מדי */
+    max-width: 150px;
+}
+
+/* החלק של הכפתורים (באמצע) */
+.player-controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+}
+
+#playBtn {
+    background: white;
+    color: black;
+    border: none;
+    border-radius: 50%;
+    width: 45px;
+    height: 45px;
+    font-size: 1.2rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s;
+}
+
+#playBtn:hover {
+    transform: scale(1.05);
+}
+
+/* מקום ריק בצד השני כדי שהכפתור יישאר באמצע */
+.player-spacer {
+    flex: 1;
+    display: flex;
+    justify-content: flex-end;
+}
+
 #fileInput {
     position: absolute;
     width: 1px;
