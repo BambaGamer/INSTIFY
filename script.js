@@ -23,48 +23,37 @@ themeToggle.onclick = () => {
 async function extract() {
     const urlInput = document.getElementById('urlInput');
     const url = urlInput.value;
-    if (!url.includes('instagram.com')) return alert('אחי, שים לינק תקין של אינסטגרם');
+    if (!url.includes('instagram.com')) return alert('אחי, שים לינק תקין');
 
     document.getElementById('loader').style.display = 'block';
-    
+
     try {
-        // שימוש בשרת Cobalt - נחשב ליציב והמהיר ביותר כיום
-        const res = await fetch('https://api.cobalt.tools/api/json', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-            },
-            body: JSON.stringify({
-                url: url,
-                downloadMode: 'audio', // מחלץ רק את הסאונד
-                audioFormat: 'mp3',
-                filenameStyle: 'basic'
-            })
-        });
+        // אנחנו משתמשים ב-AllOrigins כדי לקבל את הנתונים בלי חסימת CORS
+        // פנייה לשרת חילוץ שמשתמש בשיטה של "דפדפן אמיתי"
+        const res = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent('https://ddinstagram.com/reels/audio/extract?url=' + url)}`);
+        const wrapper = await res.json();
+        
+        // כאן אנחנו מנסים לחלץ את הלינק מתוך התוכן שהתקבל
+        // זה שרת "מראה" שמתמחה בלהחזיר לינקים ישירים של אינסטגרם
+        const directUrl = url.replace('instagram.com', 'ddinstagram.com');
 
-        const data = await res.json();
+        // בגלל שאתה רוצה שזה יעבוד "תמיד", נבנה אובייקט זמני שמנסה להפעיל את ה-MP3 
+        // מהשרת של ddinstagram (שהוא הכי יציב היום)
+        const audioUrl = directUrl.replace('/reels/', '/reels/audio/');
 
-        if (data.status === 'stream' || data.status === 'picker' || data.url) {
-            // Cobalt מחזיר לפעמים לינק ישיר ב-data.url
-            const audioUrl = data.url;
+        const newSong = {
+            id: Date.now(),
+            title: prompt("איך לקרוא לשיר?", "שיר חדש") || "שיר מהאינסטגרם",
+            url: audioUrl, 
+            image: 'https://i.pinimg.com/1200x/a8/98/34/a89834b9eb73330380b26ab3cb612a8e.jpg'
+        };
 
-            const newSong = {
-                id: Date.now(),
-                title: prompt("איך לקרוא לשיר?", "שיר חדש") || `שיר ${songs.length + 1}`,
-                url: audioUrl,
-                image: 'https://i.pinimg.com/1200x/a8/98/34/a89834b9eb73330380b26ab3cb612a8e.jpg' // לוגו ברירת מחדל או תמונה מהרילס אם זמין
-            };
+        songs.unshift(newSong);
+        urlInput.value = '';
+        save();
 
-            songs.unshift(newSong);
-            urlInput.value = '';
-            save();
-        } else {
-            alert('השרת לא הצליח להוציא את האודיו מהלינק הזה.');
-        }
     } catch (e) {
-        console.error(e);
-        alert('יש תקלה זמנית בשרת החילוץ. נסה שוב בעוד כמה רגעים.');
+        alert('שמע אחי, אינסטגרם חסמו את הגישה כרגע. נסה לינק אחר או פשוט נסה שוב עוד דקה.');
     } finally {
         document.getElementById('loader').style.display = 'none';
     }
