@@ -38,7 +38,6 @@ body {
     padding: 20px; 
 }
         
-/* עיצוב כללי לכפתור */
 .theme-btn {
     background: var(--secondary);
     border: 1px solid var(--border);
@@ -49,28 +48,38 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    color: var(--text); /* האייקון יקבל את צבע הטקסט אוטומטית */
-    padding: 10px;
+    padding: 8px; /* קצת ריפוד פנימי לתמונה */
+    overflow: hidden; /* שומר שהתמונה לא תצא מהעיגול */
+    transition: background 0.3s, border-color 0.3s;
 }
 
-/* הגדרת גודל לאייקונים */
-.theme-btn svg {
-    width: 24px;
-    height: 24px;
-    transition: transform 0.4s ease; /* אנימציה של סיבוב קטן */
+/* הגדרות כלליות לתמונות שבתוך הכפתור */
+.theme-icon {
+    width: 100%;
+    height: 100%;
+    object-fit: contain; /* שומר על פרופורציות התמונה */
+    transition: transform 0.4s ease, opacity 0.3s ease;
 }
 
-/* הסתרת האייקונים לפי המצב */
-.sun-icon { display: block; }
-.moon-icon { display: none; }
+/* כברירת מחדל (מצב לילה), השמש מוסתרת והירח מוצג */
+.sun-icon {
+    display: none;
+}
+.moon-icon {
+    display: block;
+}
 
-/* כשהגוף במצב יום, נהפוך את התצוגה */
-body.light-mode .sun-icon { display: none; }
-body.light-mode .moon-icon { display: block; }
+/* כשהגוף במצב יום (light-mode), נהפוך את התצוגה */
+body.light-mode .sun-icon {
+    display: block;
+}
+body.light-mode .moon-icon {
+    display: none;
+}
 
-/* אפקט סיבוב בלחיצה */
-.theme-btn:active svg {
-    transform: rotate(45deg);
+/* אפקט סיבוב והגדלה קטן כשלוחצים */
+.theme-btn:active .theme-icon {
+    transform: scale(0.9) rotate(15deg);
 }
         header { margin-top: 30px; margin-bottom: 30px; text-align: right; }
         h1 { font-size: 3rem; margin: 0; font-weight: 900; letter-spacing: -1px; }
@@ -101,20 +110,8 @@ body.light-mode .moon-icon { display: block; }
 
 <header style="display: flex; justify-content: space-between; align-items: center; margin-top: 30px; margin-bottom: 30px;">
 <button id="themeToggle" class="theme-btn">
-    <svg class="sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <circle cx="12" cy="12" r="5"></circle>
-        <line x1="12" y1="1" x2="12" y2="3"></line>
-        <line x1="12" y1="21" x2="12" y2="23"></line>
-        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-        <line x1="1" y1="12" x2="3" y2="12"></line>
-        <line x1="21" y1="12" x2="23" y2="12"></line>
-        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
-        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
-    </svg>
-    <svg class="moon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-    </svg>
+    <img src="/sun.png" alt="יום" class="theme-icon sun-icon">
+    <img src="/moon.png" alt="לילה" class="theme-icon moon-icon">
 </button>
     <div>
         <h1 style="margin: 0;">InStify</h1>
@@ -148,18 +145,19 @@ body.light-mode .moon-icon { display: block; }
             render();
         }
 
-        const themeToggle = document.getElementById('themeToggle');
+const themeToggle = document.getElementById('themeToggle');
 const body = document.body;
 
-// טעינת הגדרת נושא שנשמרה
+// --- לוגיקת מצב יום/לילה ---
+// רק טעינת הזיכרון (ה-CSS יטפל באייקון אוטומטית)
 if (localStorage.getItem('theme') === 'light') {
     body.classList.add('light-mode');
-    themeToggle.innerText = '☀️';
 }
 
 themeToggle.onclick = () => {
     body.classList.toggle('light-mode');
     const isLight = body.classList.contains('light-mode');
+    // שמירה בזיכרון
     localStorage.setItem('theme', isLight ? 'light' : 'dark');
 };
 
