@@ -28,37 +28,43 @@ async function extract() {
     document.getElementById('loader').style.display = 'block';
     
     try {
-        // אנחנו משתמשים בשירות שסורק את ה-HTML של הדף ומוציא את הלינק הישיר
-        // זה עוקף את חסימות ה-CORS ומחזיר JSON נקי
-        const res = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent('https://api.vkrhost.com/api/download/instagram?url=' + url)}`);
-        const wrapper = await res.json();
-        const data = JSON.parse(wrapper.contents);
-        
-        if (data && data.data) {
-            // מחפשים את ה-MP3 הכי איכותי ברשימה
-            const audioData = data.data.find(item => item.type === 'audio' || item.format === 'mp3');
-            const thumbData = data.data.find(item => item.type === 'image') || { url: 'https://via.placeholder.com/150' };
+        // שימוש בשרת Cobalt - נחשב ליציב והמהיר ביותר כיום
+        const res = await fetch('https://api.cobalt.tools/api/json', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({
+                url: url,
+                downloadMode: 'audio', // מחלץ רק את הסאונד
+                audioFormat: 'mp3',
+                filenameStyle: 'basic'
+            })
+        });
 
-            if (audioData) {
-                const songTitle = prompt("איך לקרוא לשיר?", "שיר חדש") || "שיר ללא שם";
-                
-                const newSong = {
-                    id: Date.now(),
-                    title: songTitle,
-                    url: audioData.url,
-                    image: thumbData.url
-                };
+        const data = await res.json();
 
-                songs.unshift(newSong);
-                urlInput.value = '';
-                save();
-            } else {
-                alert('הצלחתי למצוא את הרילס, אבל אין לו קובץ אודיו נפרד.');
-            }
+        if (data.status === 'stream' || data.status === 'picker' || data.url) {
+            // Cobalt מחזיר לפעמים לינק ישיר ב-data.url
+            const audioUrl = data.url;
+
+            const newSong = {
+                id: Date.now(),
+                title: prompt("איך לקרוא לשיר?", "שיר חדש") || `שיר ${songs.length + 1}`,
+                url: audioUrl,
+                image: 'https://i.pinimg.com/1200x/a8/98/34/a89834b9eb73330380b26ab3cb612a8e.jpg' // לוגו ברירת מחדל או תמונה מהרילס אם זמין
+            };
+
+            songs.unshift(newSong);
+            urlInput.value = '';
+            save();
+        } else {
+            alert('השרת לא הצליח להוציא את האודיו מהלינק הזה.');
         }
     } catch (e) {
         console.error(e);
-        alert('יש עומס על שרתי החילוץ. נסה שוב בעוד כמה שניות.');
+        alert('יש תקלה זמנית בשרת החילוץ. נסה שוב בעוד כמה רגעים.');
     } finally {
         document.getElementById('loader').style.display = 'none';
     }
