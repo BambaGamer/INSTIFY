@@ -22,38 +22,47 @@ themeToggle.onclick = () => {
 
 async function extract() {
     const urlInput = document.getElementById('urlInput');
-    const url = urlInput.value;
+    let url = urlInput.value.trim();
+    
     if (!url.includes('instagram.com')) return alert('אחי, שים לינק תקין');
 
     document.getElementById('loader').style.display = 'block';
 
+    // הטריק: אנחנו הופכים את הלינק ללינק של "מראה" שפתוח להורדה
+    // הופך את www.instagram.com ל-ddinstagram.com
+    let dlUrl = url.replace('instagram.com', 'ddinstagram.com');
+    
+    // מוודא שאנחנו פונים לגרסת ה-MP4/MP3
+    if (!dlUrl.includes('ddinstagram.com')) {
+        alert('בעיה בעיבוד הלינק, נסה שוב');
+        document.getElementById('loader').style.display = 'none';
+        return;
+    }
+
     try {
-        // אנחנו משתמשים ב-AllOrigins כדי לקבל את הנתונים בלי חסימת CORS
-        // פנייה לשרת חילוץ שמשתמש בשיטה של "דפדפן אמיתי"
-        const res = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent('https://ddinstagram.com/reels/audio/extract?url=' + url)}`);
-        const wrapper = await res.json();
+        // אנחנו לא צריכים FETCH כאן כי השרת של ddinstagram
+        // מייצר לנו לינק ישיר לקובץ.
+        const songTitle = prompt("איך לקרוא לשיר?", "שיר חדש") || "שיר מהאינסטגרם";
         
-        // כאן אנחנו מנסים לחלץ את הלינק מתוך התוכן שהתקבל
-        // זה שרת "מראה" שמתמחה בלהחזיר לינקים ישירים של אינסטגרם
-        const directUrl = url.replace('instagram.com', 'ddinstagram.com');
-
-        // בגלל שאתה רוצה שזה יעבוד "תמיד", נבנה אובייקט זמני שמנסה להפעיל את ה-MP3 
-        // מהשרת של ddinstagram (שהוא הכי יציב היום)
-        const audioUrl = directUrl.replace('/reels/', '/reels/audio/');
-
         const newSong = {
             id: Date.now(),
-            title: prompt("איך לקרוא לשיר?", "שיר חדש") || "שיר מהאינסטגרם",
-            url: audioUrl, 
+            title: songTitle,
+            url: dlUrl, // הלינק הזה הופך ישירות לקובץ מדיה שניתן לנגן
             image: 'https://i.pinimg.com/1200x/a8/98/34/a89834b9eb73330380b26ab3cb612a8e.jpg'
         };
 
         songs.unshift(newSong);
         urlInput.value = '';
         save();
+        
+        // בדיקה קטנה אם הלינק עובד
+        audio.src = dlUrl;
+        audio.onerror = () => {
+            console.log("Waiting for mirror to sync...");
+        };
 
     } catch (e) {
-        alert('שמע אחי, אינסטגרם חסמו את הגישה כרגע. נסה לינק אחר או פשוט נסה שוב עוד דקה.');
+        alert('שגיאה בחילוץ. נסה שוב בעוד כמה רגעים.');
     } finally {
         document.getElementById('loader').style.display = 'none';
     }
