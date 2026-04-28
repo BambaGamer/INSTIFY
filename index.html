@@ -160,7 +160,6 @@ if (localStorage.getItem('theme') === 'light') {
 themeToggle.onclick = () => {
     body.classList.toggle('light-mode');
     const isLight = body.classList.contains('light-mode');
-    themeToggle.innerText = isLight ? '☀️' : '🌙';
     localStorage.setItem('theme', isLight ? 'light' : 'dark');
 };
 
