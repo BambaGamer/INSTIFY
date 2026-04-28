@@ -23,37 +23,42 @@ themeToggle.onclick = () => {
 async function extract() {
     const urlInput = document.getElementById('urlInput');
     const url = urlInput.value;
-    if (!url.includes('instagram.com')) return alert('אחי, שים לינק תקין');
+    if (!url.includes('instagram.com')) return alert('אחי, שים לינק תקין של אינסטגרם');
 
     document.getElementById('loader').style.display = 'block';
     
     try {
-        // זה שרת שמתמחה בלהוציא MP3 מאינסטגרם בצורה יציבה
-        const res = await fetch(`https://api.vkrhost.com/api/download/instagram?url=${encodeURIComponent(url)}`);
-        const data = await res.json();
+        // אנחנו משתמשים בשירות שסורק את ה-HTML של הדף ומוציא את הלינק הישיר
+        // זה עוקף את חסימות ה-CORS ומחזיר JSON נקי
+        const res = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent('https://api.vkrhost.com/api/download/instagram?url=' + url)}`);
+        const wrapper = await res.json();
+        const data = JSON.parse(wrapper.contents);
         
-        if (data.status && data.data) {
-            // מחפשים את הלינק של האודיו בתוך התוצאות
-            const audioUrl = data.data.find(item => item.type === 'audio')?.url;
-            const thumbnail = data.data.find(item => item.type === 'image')?.url;
+        if (data && data.data) {
+            // מחפשים את ה-MP3 הכי איכותי ברשימה
+            const audioData = data.data.find(item => item.type === 'audio' || item.format === 'mp3');
+            const thumbData = data.data.find(item => item.type === 'image') || { url: 'https://via.placeholder.com/150' };
 
-            if (audioUrl) {
+            if (audioData) {
+                const songTitle = prompt("איך לקרוא לשיר?", "שיר חדש") || "שיר ללא שם";
+                
                 const newSong = {
                     id: Date.now(),
-                    title: prompt("איך לקרוא לשיר?", "שיר חדש") || "שיר ללא שם",
-                    url: audioUrl,
-                    image: thumbnail || 'https://via.placeholder.com/150'
+                    title: songTitle,
+                    url: audioData.url,
+                    image: thumbData.url
                 };
+
                 songs.unshift(newSong);
                 urlInput.value = '';
                 save();
+            } else {
+                alert('הצלחתי למצוא את הרילס, אבל אין לו קובץ אודיו נפרד.');
             }
-        } else {
-            alert('לא הצלחתי למצוא אודיו בלינק הזה.');
         }
     } catch (e) {
         console.error(e);
-        alert('יש תקלה בשרת החילוץ, נסה שוב עוד דקה.');
+        alert('יש עומס על שרתי החילוץ. נסה שוב בעוד כמה שניות.');
     } finally {
         document.getElementById('loader').style.display = 'none';
     }
