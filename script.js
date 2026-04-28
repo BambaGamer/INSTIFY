@@ -96,10 +96,10 @@ themeToggle.addEventListener('click', () => {
 function play(song) {
     const player = document.getElementById('player');
     const playerTitle = document.getElementById('playerTitle');
-    const playerImg = document.getElementById('playerImg');
 
+    // בדיקה: האם השיר הזה הוא השיר שנטען כבר בנגן?
     if (audio.dataset.currentId === song.id.toString()) {
-        if (isPlaying) {
+        if (!audio.paused) {
             audio.pause();
             isPlaying = false;
         } else {
@@ -107,10 +107,9 @@ function play(song) {
             isPlaying = true;
         }
     } else {
-        // שחרור זיכרון מלינקים קודמים כדי למנוע כבדות
-        if (audio.src) URL.revokeObjectURL(audio.src);
+        // שיר חדש לגמרי
+        if (audio.src) URL.revokeObjectURL(audio.src); // ניקוי זיכרון
 
-        // יצירת לינק זמני לניגון הקובץ שנמצא ב-DB
         const songUrl = URL.createObjectURL(song.fileData);
         audio.src = songUrl;
         audio.dataset.currentId = song.id;
@@ -119,13 +118,10 @@ function play(song) {
             isPlaying = true;
             if (player) player.style.display = 'flex';
             if (playerTitle) playerTitle.innerText = song.title;
-            if (playerImg) playerImg.src = song.image;
-        }).catch(err => {
-            console.error("Playback error:", err);
-            alert("לא ניתן לנגן את הקובץ. נסה להעלות אותו מחדש.");
-        });
+        }).catch(err => console.error("Error playing:", err));
     }
-    updateBtn();
+    
+    updateBtn(); // מעדכן את האייקון של ה-Play/Pause
 }
 
 // --- 5. עדכון התצוגה (Rendering) ---
