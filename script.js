@@ -1,136 +1,103 @@
-let songs = JSON.parse(localStorage.getItem('instify_data')) || [];
-const audio = new Audio();
-let isPlaying = false;
+// 1. הגדרת מסד הנתונים (IndexedDB)
+const dbName = "InstifyDB";
+let db;
 
-function save() {
-    localStorage.setItem('instify_data', JSON.stringify(songs));
-    render();
-}
-
-const themeToggle = document.getElementById('themeToggle');
-const body = document.body;
-
-if (localStorage.getItem('theme') === 'light') {
-    body.classList.add('light-mode');
-}
-
-themeToggle.onclick = () => {
-    body.classList.toggle('light-mode');
-    const isLight = body.classList.contains('light-mode');
-    localStorage.setItem('theme', isLight ? 'light' : 'dark');
+const request = indexedDB.open(dbName, 1);
+request.onupgradeneeded = (e) => {
+    db = e.target.result;
+    db.createObjectStore("songs", { keyPath: "id" });
+};
+request.onsuccess = (e) => {
+    db = e.target.result;
+    loadSongsFromDB(); // טעינת שירים ברגע שהמסד מוכן
 };
 
-// הפונקציה הזו קוראת את הקובץ שהורדת מהמכשיר
+let songs = [];
+let audio = new Audio();
+let isPlaying = false;
+
+// 2. שמירת שיר במסד הנתונים
+async function saveToDB(song) {
+    const tx = db.transaction("songs", "readwrite");
+    tx.objectStore("songs").add(song);
+}
+
+// 3. טעינת שירים והצגתם
+async function loadSongsFromDB() {
+    const tx = db.transaction("songs", "readonly");
+    const store = tx.objectStore("songs");
+    const request = store.getAll();
+    request.onsuccess = () => {
+        songs = request.result;
+        render();
+    };
+}
+
+// 4. פונקציית העלאת קובץ (מופעלת מהטיל)
 document.getElementById('fileInput').addEventListener('change', function(event) {
     const file = event.target.files[0];
     if (!file) return;
 
-    // מציג טעינה
-    document.getElementById('loader').style.display = 'block';
-
-    const reader = new FileReader();
+    const songTitle = prompt("איך לקרוא לשיר?", file.name.replace(/\.[^/.]+$/, "")) || "שיר חדש";
     
-    reader.onload = function(e) {
-        const songTitle = prompt("איך לקרוא לשיר?", file.name.replace('.mp3', '')) || "שיר חדש";
-        
-        const newSong = {
-            id: Date.now(),
-            title: songTitle,
-            url: e.target.result, // כאן נשמר השיר עצמו בזיכרון של האתר
-            image: 'https://i.pinimg.com/1200x/a8/98/34/a89834b9eb73330380b26ab3cb612a8e.jpg'
-        };
-
-        songs.unshift(newSong); // מוסיף לראש הרשימה
-        save();   // שומר בזיכרון של הדפדפן (LocalStorage)
-        render(); // מעדכן את המסך
-        
-        document.getElementById('loader').style.display = 'none';
-        alert("השיר נוסף בהצלחה!");
+    const newSong = {
+        id: Date.now(),
+        title: songTitle,
+        fileData: file, // הקובץ עצמו נשמר ב-DB
+        image: 'https://i.pinimg.com/1200x/a8/98/34/a89834b9eb73330380b26ab3cb612a8e.jpg'
     };
 
-    // קריאת הקובץ
-    reader.readAsDataURL(file);
+    saveToDB(newSong).then(() => {
+        songs.unshift(newSong);
+        render();
+    });
 });
+
+// 5. ניגון (עובד גם אחרי ריענון!)
+function play(song) {
+    if (audio.dataset.currentId === song.id.toString()) {
+        if (isPlaying) { audio.pause(); isPlaying = false; }
+        else { audio.play(); isPlaying = true; }
+    } else {
+        // יצירת לינק זמני מהקובץ שנשמר ב-DB
+        const songUrl = URL.createObjectURL(song.fileData);
+        audio.src = songUrl;
+        audio.dataset.currentId = song.id;
+        audio.play().then(() => {
+            isPlaying = true;
+            document.getElementById('player').style.display = 'flex';
+            document.getElementById('playerTitle').innerText = song.title;
+            updateBtn();
+        });
+    }
+    updateBtn();
+}
 
 function render() {
     const list = document.getElementById('playlist');
-    const count = document.getElementById('count');
     list.innerHTML = '';
-    count.innerText = `${songs.length} שירים בפלייליסט`;
-
     songs.forEach((song, index) => {
         const card = document.createElement('div');
         card.className = 'song-card';
-        // הוספתי אימוג'י של פליי כדי שיהיה לך איפה ללחוץ
         card.innerHTML = `
             <img src="${song.image}" class="thumb">
-            <div class="info">
-                <p>${song.title}</p>
-                <small style="color: var(--primary)">לחץ להשמעה ▶️</small>
-            </div>
-            <button class="btn-delete" onclick="deleteSong(event, ${index})">🗑️</button>
+            <div class="info"><p>${song.title}</p></div>
+            <button class="btn-delete" onclick="deleteSong(event, ${song.id})">🗑️</button>
         `;
         card.onclick = () => play(song);
         list.appendChild(card);
     });
 }
 
-async function play(song) {
-    const player = document.getElementById('player');
-    const playerTitle = document.getElementById('playerTitle');
-    
-    try {
-        if (audio.dataset.currentId === song.id.toString()) {
-            if (isPlaying) { audio.pause(); isPlaying = false; }
-            else { audio.play(); isPlaying = true; }
-            updateBtn();
-            return;
-        }
-
-        playerTitle.innerText = "מעבד סאונד...";
-        player.style.display = 'flex';
-
-        // שימוש בפרוקסי מהיר במיוחד כדי לעקוף את החסימה של אינסטגרם
-        // זה גורם לאינסטגרם לחשוב שגולש רגיל מוריד את הקובץ
-        const proxyUrl = "https://corsproxy.io/?";
-        const finalUrl = proxyUrl + encodeURIComponent(song.url);
-
-        audio.src = finalUrl;
-        audio.dataset.currentId = song.id;
-        
-        // הגדרה שמאפשרת לדפדפן להזרים את האודיו בלי חסימות אבטחה
-        audio.crossOrigin = "anonymous"; 
-        
-        audio.play().then(() => {
-            isPlaying = true;
-            playerTitle.innerText = song.title;
-            document.getElementById('playerImg').src = song.image;
-            updateBtn();
-        }).catch(err => {
-            console.error(err);
-            alert("אינסטגרם חסמה את הזרם הזה. נסה לחלץ את השיר מחדש.");
-        });
-
-    } catch (e) {
-        alert("שגיאה בנגן.");
-    }
+async function deleteSong(e, id) {
+    e.stopPropagation();
+    const tx = db.transaction("songs", "readwrite");
+    tx.objectStore("songs").delete(id);
+    songs = songs.filter(s => s.id !== id);
+    render();
 }
 
 function updateBtn() {
-    document.getElementById('mainPlayBtn').innerText = isPlaying ? '⏸️' : '▶️';
+    const playBtn = document.getElementById('playBtn');
+    if(playBtn) playBtn.innerText = isPlaying ? '⏸' : '▶️';
 }
-
-function deleteSong(e, index) {
-    e.stopPropagation();
-    songs.splice(index, 1);
-    save();
-}
-
-document.getElementById('extractBtn').onclick = extract;
-document.getElementById('mainPlayBtn').onclick = () => {
-    if (isPlaying) { audio.pause(); isPlaying = false; }
-    else { audio.play(); isPlaying = true; }
-    updateBtn();
-};
-
-render();
