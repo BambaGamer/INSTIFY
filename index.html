@@ -38,6 +38,40 @@ body {
     padding: 20px; 
 }
         
+/* עיצוב כללי לכפתור */
+.theme-btn {
+    background: var(--secondary);
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    width: 45px;
+    height: 45px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text); /* האייקון יקבל את צבע הטקסט אוטומטית */
+    padding: 10px;
+}
+
+/* הגדרת גודל לאייקונים */
+.theme-btn svg {
+    width: 24px;
+    height: 24px;
+    transition: transform 0.4s ease; /* אנימציה של סיבוב קטן */
+}
+
+/* הסתרת האייקונים לפי המצב */
+.sun-icon { display: block; }
+.moon-icon { display: none; }
+
+/* כשהגוף במצב יום, נהפוך את התצוגה */
+body.light-mode .sun-icon { display: none; }
+body.light-mode .moon-icon { display: block; }
+
+/* אפקט סיבוב בלחיצה */
+.theme-btn:active svg {
+    transform: rotate(45deg);
+}
         header { margin-top: 30px; margin-bottom: 30px; text-align: right; }
         h1 { font-size: 3rem; margin: 0; font-weight: 900; letter-spacing: -1px; }
         .count { color: var(--primary); font-weight: bold; font-size: 0.9rem; }
@@ -87,6 +121,7 @@ body {
         <div class="count" id="count">0 שירים בפלייליסט</div>
     </div>
 </header>
+
 
     <div class="input-area">
         <input type="text" id="urlInput" class="input-box" placeholder="תדביק פה אחי" dir="ltr">
