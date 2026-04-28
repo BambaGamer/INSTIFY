@@ -26,6 +26,42 @@ body {
     padding: 20px; 
 }
         
+/* 1. התאמת הכפתור עצמו (btn-go הקיים) */
+.btn-go {
+    background: var(--primary); /* הירוק של ספוטיפיי */
+    border: none;
+    border-radius: 12px;
+    width: 60px;
+    height: 55px;
+    cursor: pointer;
+    transition: 0.2s;
+    
+    /* מוסיף יישור מרכזי לתמונה (הכי חשוב!) */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden; /* שומר שהתמונה לא תצא מהגבולות */
+    padding: 0; /* מונע מהתמונה להידחף */
+}
+
+/* 2. עיצוב התמונה שבתוך הכפתור (המחלקה החדשה) */
+.rocket-icon {
+    width: 32px;  /* הגודל האידיאלי בתוך הכפתור שלך */
+    height: 32px;
+    object-fit: contain; /* מבטיח שהתמונה לא תתעוות */
+    transition: 0.3s ease; /* אנימציה חלקה */
+}
+
+/* 3. אנימציית סיבוב והגדלה כשלמצביעים על הכפתור */
+.btn-go:hover .rocket-icon {
+    transform: scale(1.1) rotate(5deg);
+}
+
+/* 4. אנימציית התכווצות כשלוחצים (כבר קיימת, אבל נחדד אותה) */
+.btn-go:active {
+    transform: scale(0.9);
+}
+
 .theme-btn {
     background: var(--secondary);
     border: 1px solid var(--border);
