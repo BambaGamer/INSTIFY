@@ -206,25 +206,6 @@ h1 { font-size: 3rem; margin: 0; font-weight: 900; letter-spacing: -1px; }
     text-overflow: ellipsis;
 }
 
-
-#playBtn:hover {
-    transform: scale(1.05);
-}
-
-/* סידור הפנים של הנגן - צד שמאל (ריק) */
-.player-spacer {
-    flex: 1; /* תופס את השליש השמאלי - יוצר איזון */
-}
-
-/* --- לואדר --- */
-.loader { 
-    display: none; 
-    text-align: center; 
-    color: var(--primary); 
-    margin-bottom: 20px; 
-    font-weight: bold; 
-}
-
 /* התאמה לנייד */
 @media (max-width: 480px) {
     #playerTitle { max-width: 100px; font-size: 12px; }
