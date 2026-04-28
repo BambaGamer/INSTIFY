@@ -27,47 +27,44 @@ body {
 }
 
 .input-area {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 20px;
+    margin-bottom: 25px;
 }
 
-#urlInput {
-    flex: 1;
-    padding: 12px;
-    border-radius: 12px;
-    border: 1px solid #333;
-    background: #1a1a1a;
-    color: white;
-}
-
-.btn-go {
+.btn-upload-full {
+    width: 100%;
+    height: 60px;
     background: var(--primary); /* הירוק של ספוטיפיי */
     border: none;
-    border-radius: 12px;
-    width: 55px;
-    height: 50px;
-    cursor: pointer;
+    border-radius: 15px;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: 0.2s;
+    gap: 15px; /* רווח בין הטיל לטקסט */
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.btn-upload-full span {
+    color: black;
+    font-size: 1.1rem;
+    font-weight: bold;
 }
 
 .rocket-icon {
-    width: 30px;
-    height: 30px;
+    width: 35px;
+    height: 35px;
     object-fit: contain;
 }
 
-.btn-go:hover {
-    transform: scale(1.05);
+.btn-upload-full:hover {
+    transform: translateY(-3px);
     filter: brightness(1.1);
+    box-shadow: 0 6px 20px rgba(30, 215, 96, 0.4);
 }
 
-/* 4. אנימציית התכווצות כשלוחצים (כבר קיימת, אבל נחדד אותה) */
-.btn-go:active {
-    transform: scale(0.9);
+.btn-upload-full:active {
+    transform: translateY(1px);
 }
 
 .theme-btn {
