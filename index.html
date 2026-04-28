@@ -37,11 +37,16 @@
 
     <div class="list" id="playlist"></div>
 
-    <div class="player" id="player">
-        <img src="" id="playerImg" class="player-img">
-        <div class="player-title" id="playerTitle">מנגן כעת...</div>
-        <button class="play-btn" id="mainPlayBtn">⏸️</button>
+<div id="player" class="player-bar" style="display:none;">
+    <img id="playerImg" src="" class="player-thumb">
+    <div class="player-info">
+        <p id="playerTitle">שם השיר</p>
     </div>
+    
+    <div class="player-controls">
+        <button id="playBtn" class="control-btn">▶️</button>
+    </div>
+</div>
 
     <!-- קישור לקובץ ה-JS החיצוני -->
     <script src="script.js"></script>

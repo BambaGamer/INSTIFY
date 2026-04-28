@@ -167,15 +167,36 @@ function deleteSong(e, id) {
 }
 
 // --- 7. עדכון כפתור Play/Pause ---
+// פונקציה לעדכון האייקון של הכפתור
 function updateBtn() {
-    const playBtn = document.getElementById('playBtn');
-    if (playBtn) {
-        playBtn.innerText = isPlaying ? '⏸' : '▶️';
+    const mainPlayBtn = document.getElementById('playBtn');
+    if (mainPlayBtn) {
+        // אם האודיו מנגן - שים אייקון של פוס, אם לא - שים פליי
+        mainPlayBtn.innerText = audio.paused ? '▶️' : '⏸';
     }
 }
 
-// טיפול בסיום שיר
-audio.onended = () => {
-    isPlaying = false;
-    updateBtn();
-};
+// חיבור הכפתור למטה לפעולת Play/Pause
+// אנחנו שמים את זה מחוץ לפונקציות כדי שזה ירוץ ברגע שהדף נטען
+document.addEventListener('DOMContentLoaded', () => {
+    const mainPlayBtn = document.getElementById('playBtn');
+    if (mainPlayBtn) {
+        mainPlayBtn.onclick = (e) => {
+            e.stopPropagation(); // מונע בעיות לחיצה באייפון
+            
+            if (!audio.src) return; // אם לא נבחר שיר עדיין
+
+            if (audio.paused) {
+                audio.play();
+            } else {
+                audio.pause();
+            }
+            updateBtn(); // מעדכן את האייקון מיד
+        };
+    }
+});
+
+// מאזינים לאירועים של האודיו עצמו כדי לעדכן את הכפתור תמיד
+audio.onplay = updateBtn;
+audio.onpause = updateBtn;
+audio.onended = updateBtn;
