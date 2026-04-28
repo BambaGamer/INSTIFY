@@ -25,12 +25,13 @@
     </div>
 </header>
 
-    <div class="input-area">
-        <input type="text" id="urlInput" class="input-box" placeholder="תדביק פה אחי" dir="ltr">
-<button class="btn-go" id="extractBtn">
-    <img src="/rocket.png" alt="חילוץ" class="rocket-icon">
-</button>
-    </div>
+<div class="input-area">
+    <input type="file" id="fileInput" accept="audio/*" style="display:none">
+    
+    <button class="btn-go" onclick="document.getElementById('fileInput').click()" style="width:100%; height: 50px; font-weight: bold;">
+        🚀 הוסף שיר שהורדת (MP3)
+    </button>
+</div>
 
     <div id="loader" class="loader">מחלץ סאונד...</div>
 

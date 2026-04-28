@@ -20,45 +20,37 @@ themeToggle.onclick = () => {
     localStorage.setItem('theme', isLight ? 'light' : 'dark');
 };
 
-async function extract() {
-    const urlInput = document.getElementById('urlInput');
-    const url = urlInput.value.trim();
-    if (!url.includes('instagram.com')) return alert('אחי, שים לינק תקין של אינסטגרם');
+// הפונקציה הזו קוראת את הקובץ שהורדת מהמכשיר
+document.getElementById('fileInput').addEventListener('change', function(event) {
+    const file = event.target.files[0];
+    if (!file) return;
 
+    // מציג טעינה
     document.getElementById('loader').style.display = 'block';
-    
-    try {
-        // שימוש ב-API של "SSSTwitter/Insta" - הם הכי יציבים כי הם לא נחסמים בקלות
-        const response = await fetch(`https://api.worker.id/igdl?url=${encodeURIComponent(url)}`);
-        const data = await response.json();
-        
-        // השרת הזה מחזיר לינק ישיר שפתוח לכל העולם
-        if (data && data.result && data.result.length > 0) {
-            const media = data.result.find(item => item.type === 'audio') || data.result[0];
-            
-            const newSong = {
-                id: Date.now(),
-                title: prompt("איך לקרוא לשיר?", "שיר חדש") || "שיר מהאינסטגרם",
-                url: media.url, // זה הלינק הישיר לקובץ
-                image: 'https://i.pinimg.com/1200x/a8/98/34/a89834b9eb73330380b26ab3cb612a8e.jpg'
-            };
 
-            songs.unshift(newSong);
-            urlInput.value = '';
-            save();
-            alert("השיר נוסף! אם הוא לא מנגן, לחץ עליו שוב בעוד כמה שניות");
-        } else {
-            alert('השרת לא הצליח לחלץ. נסה שוב בעוד רגע.');
-        }
-    } catch (e) {
-        // אם הכל נכשל - פותחים את reelsave בשבילך עם הלינק כבר מוכן
-        if(confirm("שרת החילוץ עמוס. לפתוח לך את הלינק ב-ReelSave כדי שתעתיק את ה-MP3?")) {
-            window.open(`https://reelsave.app/audio?url=${encodeURIComponent(url)}`, '_blank');
-        }
-    } finally {
+    const reader = new FileReader();
+    
+    reader.onload = function(e) {
+        const songTitle = prompt("איך לקרוא לשיר?", file.name.replace('.mp3', '')) || "שיר חדש";
+        
+        const newSong = {
+            id: Date.now(),
+            title: songTitle,
+            url: e.target.result, // כאן נשמר השיר עצמו בזיכרון של האתר
+            image: 'https://i.pinimg.com/1200x/a8/98/34/a89834b9eb73330380b26ab3cb612a8e.jpg'
+        };
+
+        songs.unshift(newSong); // מוסיף לראש הרשימה
+        save();   // שומר בזיכרון של הדפדפן (LocalStorage)
+        render(); // מעדכן את המסך
+        
         document.getElementById('loader').style.display = 'none';
-    }
-}
+        alert("השיר נוסף בהצלחה!");
+    };
+
+    // קריאת הקובץ
+    reader.readAsDataURL(file);
+});
 
 function render() {
     const list = document.getElementById('playlist');
