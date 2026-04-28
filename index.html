@@ -26,11 +26,13 @@
 </header>
 
 <div class="input-area">
-    <input type="file" id="fileInput" accept="audio/*" style="display:none">
+    <input type="text" id="urlInput" placeholder="בחר שיר מהמכשיר שלך...">
     
-    <button class="btn-go" onclick="document.getElementById('fileInput').click()" style="width:100%; height: 50px; font-weight: bold;">
-        🚀 הוסף שיר שהורדת (MP3)
+    <button class="btn-go" id="fileBtn" onclick="document.getElementById('fileInput').click()">
+        <img src="rocket.png" alt="הוסף" class="rocket-icon">
     </button>
+
+    <input type="file" id="fileInput" accept="audio/*" style="display:none">
 </div>
 
     <div id="loader" class="loader">מחלץ סאונד...</div>
