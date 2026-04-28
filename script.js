@@ -22,28 +22,39 @@ themeToggle.onclick = () => {
 
 async function extract() {
     const urlInput = document.getElementById('urlInput');
-    let url = urlInput.value.trim();
-    if (!url.includes('instagram.com')) return alert('אחי, שים לינק תקין');
+    const url = urlInput.value.trim();
+    if (!url.includes('instagram.com')) return alert('אחי, שים לינק תקין של אינסטגרם');
 
     document.getElementById('loader').style.display = 'block';
-
-    // יצירת לינק ישיר דרך שרת המראה עם סיומת מדיה
-    let cleanUrl = url.split('?')[0]; // מוריד זבל מהלינק
-    let dlUrl = cleanUrl.replace('instagram.com', 'ddinstagram.com') + ".mp4";
-
-    const songTitle = prompt("איך לקרוא לשיר?", "שיר חדש") || "שיר מהאינסטגרם";
     
-    const newSong = {
-        id: Date.now(),
-        title: songTitle,
-        url: dlUrl,
-        image: 'https://i.pinimg.com/1200x/a8/98/34/a89834b9eb73330380b26ab3cb612a8e.jpg'
-    };
+    try {
+        // שרת חילוץ חזק שעוקף את החסימות של אינסטגרם
+        const response = await fetch(`https://api.downloadgram.org/api/ig/v1/res?url=${encodeURIComponent(url)}`);
+        const data = await response.json();
+        
+        // מחפשים את קובץ הווידאו/אודיו בתוצאות
+        if (data && data.results && data.results.length > 0) {
+            const mediaUrl = data.results[0].url;
+            
+            const newSong = {
+                id: Date.now(),
+                title: prompt("איך לקרוא לשיר?", "שיר חדש") || "שיר מהאינסטגרם",
+                url: mediaUrl,
+                image: data.results[0].thumbnail || 'https://i.pinimg.com/1200x/a8/98/34/a89834b9eb73330380b26ab3cb612a8e.jpg'
+            };
 
-    songs.unshift(newSong);
-    urlInput.value = '';
-    save();
-    document.getElementById('loader').style.display = 'none';
+            songs.unshift(newSong);
+            urlInput.value = '';
+            save();
+        } else {
+            alert('השרת לא הצליח לחלץ את הקובץ. נסה שוב בעוד כמה שניות.');
+        }
+    } catch (e) {
+        console.error(e);
+        alert('תקלה בשרת החילוץ. נסה שוב מאוחר יותר.');
+    } finally {
+        document.getElementById('loader').style.display = 'none';
+    }
 }
 
 function render() {
@@ -70,33 +81,21 @@ function render() {
 }
 
 function play(song) {
-    // הוספת מתווך כדי לעקוף את החסימה של אינסטגרם/מראה
-    const proxyUrl = "https://api.allorigins.win/raw?url=";
-    const finalUrl = proxyUrl + encodeURIComponent(song.url);
-
-    if (audio.src === finalUrl) {
-        if (isPlaying) { 
-            audio.pause(); 
-            isPlaying = false; 
-        } else { 
-            audio.play().catch(e => console.error("Play failed:", e)); 
-            isPlaying = true; 
-        }
+    if (audio.src === song.url) {
+        if (isPlaying) { audio.pause(); isPlaying = false; }
+        else { audio.play(); isPlaying = true; }
     } else {
-        audio.src = finalUrl;
-        audio.load(); // טעינה מחדש של המקור החדש
-        audio.play()
-            .then(() => {
-                isPlaying = true;
-                document.getElementById('player').style.display = 'flex';
-                document.getElementById('playerTitle').innerText = song.title;
-                document.getElementById('playerImg').src = song.image;
-                updateBtn();
-            })
-            .catch(e => {
-                console.error("Error playing audio:", e);
-                alert("אחי, הלינק הזה חסום. נסה לחלץ את השיר מחדש.");
-            });
+        audio.src = song.url;
+        audio.play().then(() => {
+            isPlaying = true;
+            document.getElementById('player').style.display = 'flex';
+            document.getElementById('playerTitle').innerText = song.title;
+            document.getElementById('playerImg').src = song.image;
+            updateBtn();
+        }).catch(err => {
+            console.error("Playback error:", err);
+            alert("הלינק פקע. תמחק ותחלץ את השיר מחדש.");
+        });
     }
     updateBtn();
 }
