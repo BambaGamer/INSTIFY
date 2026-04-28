@@ -70,16 +70,33 @@ function render() {
 }
 
 function play(song) {
-    if (audio.src === song.url) {
-        if (isPlaying) { audio.pause(); isPlaying = false; }
-        else { audio.play(); isPlaying = true; }
+    // הוספת מתווך כדי לעקוף את החסימה של אינסטגרם/מראה
+    const proxyUrl = "https://api.allorigins.win/raw?url=";
+    const finalUrl = proxyUrl + encodeURIComponent(song.url);
+
+    if (audio.src === finalUrl) {
+        if (isPlaying) { 
+            audio.pause(); 
+            isPlaying = false; 
+        } else { 
+            audio.play().catch(e => console.error("Play failed:", e)); 
+            isPlaying = true; 
+        }
     } else {
-        audio.src = song.url;
-        audio.play();
-        isPlaying = true;
-        document.getElementById('player').style.display = 'flex';
-        document.getElementById('playerTitle').innerText = song.title;
-        document.getElementById('playerImg').src = song.image;
+        audio.src = finalUrl;
+        audio.load(); // טעינה מחדש של המקור החדש
+        audio.play()
+            .then(() => {
+                isPlaying = true;
+                document.getElementById('player').style.display = 'flex';
+                document.getElementById('playerTitle').innerText = song.title;
+                document.getElementById('playerImg').src = song.image;
+                updateBtn();
+            })
+            .catch(e => {
+                console.error("Error playing audio:", e);
+                alert("אחי, הלינק הזה חסום. נסה לחלץ את השיר מחדש.");
+            });
     }
     updateBtn();
 }

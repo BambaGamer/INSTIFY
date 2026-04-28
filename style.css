@@ -112,7 +112,14 @@ h1 { font-size: 3rem; margin: 0; font-weight: 900; letter-spacing: -1px; }
 .btn-go:active { transform: scale(0.9); }
 
 .list { display: flex; flex-direction: column; gap: 12px; padding-bottom: 100px; }
-.song-card { background: var(--card); padding: 12px; border-radius: 16px; display: flex; flex-direction: row-reverse; align-items: center; gap: 15px; transition: 0.3s; }
+.song-card {
+    cursor: pointer; /* הופך את כל הכרטיס ללחיץ */
+    user-select: none; /* מונע סימון טקסט בטעות */
+}
+.song-card:hover {
+    background: var(--secondary);
+    transform: translateY(-2px);
+}
 .song-card:active { background: #222; }
 .thumb { width: 55px; height: 55px; border-radius: 10px; object-fit: cover; background: #333; }
 .info { flex: 1; text-align: right; }
